@@ -25,7 +25,8 @@
 					type="date"
 					v-model="newTask.deadline">
 				<div class="modal-buttons">
-					<button @click="closeModal">Отмена</button>
+                    <button @click="createTask">Сохранить</button>
+                    <button @click="closeModal">Отмена</button>
 				</div>
 			</div>
 		</div>
@@ -33,18 +34,55 @@
 			<div class="column">
 				<h2>Запланированные задачи</h2>
 				<button class="add-btn" @click="openModal">+ Создать задачу</button>
-				<div class="card"></div>
-			</div>
-			<div class="column">
-				<h2>Задачи в работе</h2>
-			</div>
-			<div class="column">
-				<h2>Тестирование</h2>
-			</div>
-			<div class="column">
-				<h2>Выполненные задачи</h2>
-			</div>
-		</div>
-	</div>
+				<div class="card" v-for="(task,index) in tasks.planned" :key="index">
+                    <h3>{{task.title}}</h3>
+		            <p>{{task.description}}</p>
+                    <div class="meta">
+                        <p>Создано: {{task.createdAt}}</p>
+                        <p v-if="task.updatedAt">Редактировано: {{task.updatedAt}}</p>
+                        <p>Deadline: {{task.deadline}}</p>
+                    </div>
+                    <button @click="editTask(index)">Редактировать</button>
+                    <button @click="deleteTask(index)">Удалить</button>
+                </div>
+		    </div>
+            <div class="column">
+                <h2>Задачи в работе</h2>
+                <div class="card" v-for="(task,index) in tasks.progress" :key="index">
+                    <h3>{{task.title}}</h3>
+                    <p>{{task.description}}</p>
+                    <div class="meta">
+                        <p>Создано: {{task.createdAt}}</p>
+                        <p v-if="task.updatedAt">Редактировано: {{task.updatedAt}}</p>
+                        <p>Deadline: {{task.deadline}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="column">
+                <h2>Тестирование</h2>
+                <div class="card" v-for="(task,index) in tasks.testing" :key="index">
+                    <h3>{{task.title}}</h3>
+                    <p>{{task.description}}</p>
+                    <div class="meta">
+                        <p>Создано: {{task.createdAt}}</p>
+                        <p v-if="task.updatedAt">Редактировано: {{task.updatedAt}}</p>
+                        <p>Deadline: {{task.deadline}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="column">
+                <h2>Выполненные задачи</h2>
+                <div class="card" v-for="(task,index) in tasks.done" :key="index">
+                    <h3>{{task.title}}</h3>
+                    <p>{{task.description}}</p>
+                    <div class="meta">
+                        <p>Создано: {{task.createdAt}}</p>
+                        <p v-if="task.updatedAt">Редактировано: {{task.updatedAt}}</p>
+                        <p>Deadline: {{task.deadline}}</p>
+                    </div>
+                </div>
+
+            </div>
+	    </div>
 </body>
 </html>

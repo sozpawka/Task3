@@ -94,3 +94,11 @@ body{
 	display:flex;
 	justify-content:flex-end;
 }
+.card button{
+	margin-top:6px;
+	padding:6px;
+	border:none;
+	border-radius:6px;
+	cursor:pointer;
+	font-size:12px;
+}
