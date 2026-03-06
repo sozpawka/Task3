@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<meta charset="UTF-8">
+	<title>Kanban Board</title>
+	<link rel="stylesheet" href="css/style.css">
+	<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+	<script defer src="js/main.js"></script>
+</head>
+
+<body>
+	<div id="app">
+		<h1 class="board-title">Kanban Board</h1>
+		<div class="board">
+			<div class="column">
+				<h2>Запланированные задачи</h2>
+				<button class="add-btn">+ Создать задачу</button>
+				<div class="card">
+					<h3>Пример задачи</h3>
+					<p>Описание задачи...</p>
+
+					<div class="meta">
+						<p>Создано: 06.03.2026</p>
+						<p>Deadline: 10.03.2026</p>
+					</div>
+
+				</div>
+			</div>
+			<div class="column">
+				<h2>Задачи в работе</h2>
+			</div>
+
+			<div class="column">
+				<h2>Тестирование</h2>
+			</div>
+			<div class="column">
+				<h2>Выполненные задачи</h2>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
