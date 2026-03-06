@@ -1,7 +1,7 @@
 Vue.component('task-card', {
 	props: ['task','index','column','isDone'],
 	template:`
-		<div class="card">
+		<div class="card" :style="{ backgroundImage: 'url(' + task.theme + ')' }">
 			<h3>{{task.title}}</h3>
 			<p>{{task.description}}</p>
 			<div class="meta">
@@ -52,23 +52,39 @@ Vue.component('task-column',{
 	}
 })
 
-Vue.component('task-modal',{
+Vue.component('task-modal', {
 	props:['task'],
-	template:`
+	template: `
 		<div class="modal">
 			<div class="modal-content">
 				<h3>Создать/Редактировать задачу</h3>
 				<input type="text" v-model="task.title" placeholder="Заголовок">
 				<textarea v-model="task.description" placeholder="Описание"></textarea>
 				<input type="date" v-model="task.deadline">
+				<h4>Выбор фона</h4>
+				<div class="theme-selector">
+					<label v-for="theme in themes" :key="theme.file" style="margin-right:10px">
+						<input type="radio" v-model="task.theme" :value="theme.file">
+						<img :src="theme.file" :class="{ selected: task.theme === theme.file }" width="50">
+					</label>
+				</div>
 				<div class="modal-buttons">
 					<button @click="$emit('save')">Сохранить</button>
 					<button @click="$emit('close')">Отмена</button>
 				</div>
 			</div>
 		</div>
-	`
-})
+	`,
+	data() {
+		return {
+			themes: [
+				{ name: 'Orange', file: 'assets/orange.jpg' },
+				{ name: 'Blue', file: 'assets/blue.jpg' },
+				{ name: 'Gold', file: 'assets/gold.jpg' }
+			]
+		}
+	}
+});
 
 new Vue({
 	el:'#app',
