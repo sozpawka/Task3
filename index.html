@@ -7,29 +7,37 @@
 	<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
 	<script defer src="js/main.js"></script>
 </head>
-
 <body>
 	<div id="app">
 		<h1 class="board-title">Kanban Board</h1>
+		<div v-if="showModal" class="modal">
+			<div class="modal-content">
+				<h3>Создать задачу</h3>
+				<input
+					type="text"
+					v-model="newTask.title"
+					placeholder="Заголовок">
+				<textarea
+					v-model="newTask.description"
+					placeholder="Описание">
+				</textarea>
+				<input
+					type="date"
+					v-model="newTask.deadline">
+				<div class="modal-buttons">
+					<button @click="closeModal">Отмена</button>
+				</div>
+			</div>
+		</div>
 		<div class="board">
 			<div class="column">
 				<h2>Запланированные задачи</h2>
-				<button class="add-btn">+ Создать задачу</button>
-				<div class="card">
-					<h3>Пример задачи</h3>
-					<p>Описание задачи...</p>
-
-					<div class="meta">
-						<p>Создано: 06.03.2026</p>
-						<p>Deadline: 10.03.2026</p>
-					</div>
-
-				</div>
+				<button class="add-btn" @click="openModal">+ Создать задачу</button>
+				<div class="card"></div>
 			</div>
 			<div class="column">
 				<h2>Задачи в работе</h2>
 			</div>
-
 			<div class="column">
 				<h2>Тестирование</h2>
 			</div>
