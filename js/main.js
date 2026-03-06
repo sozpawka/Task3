@@ -113,6 +113,14 @@ new Vue({
 			if (!task.deadline) return false
 			return new Date(task.deadline) < new Date()
 		},
+        returnToProgress(index) {
+			let task = this.tasks.testing[index]
+			let reason = prompt('Укажите причину возврата задачи в работу:')
+			if (!reason) return
+			task.returnReason = reason
+			this.tasks.progress.push(task)
+			this.tasks.testing.splice(index, 1) 
+		},
 	}
 })
 
