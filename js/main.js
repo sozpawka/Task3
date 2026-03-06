@@ -1,9 +1,81 @@
+Vue.component('task-card', {
+	props: ['task','index','column','isDone'],
+	template:`
+		<div class="card">
+			<h3>{{task.title}}</h3>
+			<p>{{task.description}}</p>
+			<div class="meta">
+				<p>Создано: {{task.createdAt}}</p>
+				<p v-if="task.updatedAt">Редактировано: {{task.updatedAt}}</p>
+				<p>Deadline: {{task.deadline}}</p>
+				<p v-if="task.returnReason">Причина возврата: {{task.returnReason}}</p>
+			</div>
+			<button v-if="!isDone" @click="$emit('edit', index)">Редактировать</button>
+			<button v-if="column==='planned'" @click="$emit('move', index)">→ В работу</button>
+			<button v-if="column==='progress'" @click="$emit('move', index)">→ Тестирование</button>
+			<button v-if="column==='testing'" @click="$emit('move-to-done', index)">→ Выполнено</button>
+			<button v-if="column==='testing'" @click="$emit('return-to-progress', index)">← Вернуть в работу</button>
+			<button v-if="column==='planned'" @click="$emit('delete', index)">Удалить</button>
+		</div>
+	`
+})
+
+Vue.component('task-column',{
+	props:['title','tasks','showAddBtn','isDone'],
+	template:`
+		<div class="column">
+			<h2>{{title}}</h2>
+			<button v-if="showAddBtn" class="add-btn" @click="$emit('open-modal')">+ Создать задачу</button>
+			<task-card 
+				v-for="(task,index) in tasks" 
+				:key="index" 
+				:task="task" 
+				:index="index" 
+				:column="columnName"
+                :is-done="isDone"
+				@edit="$emit('edit', $event)"
+				@delete="$emit('delete', $event)"
+				@move="$emit('move', $event)"
+				@move-to-done="$emit('move-to-done', $event)"
+				@return-to-progress="$emit('return-to-progress', $event)">
+			</task-card>
+		</div>
+	`,
+	computed:{
+		columnName(){
+			if(this.title==='Запланированные задачи') return 'planned'
+			if(this.title==='Задачи в работе') return 'progress'
+			if(this.title==='Тестирование') return 'testing'
+			if(this.title==='Выполненные задачи') return 'done'
+			return ''
+		}
+	}
+})
+
+Vue.component('task-modal',{
+	props:['task'],
+	template:`
+		<div class="modal">
+			<div class="modal-content">
+				<h3>Создать/Редактировать задачу</h3>
+				<input type="text" v-model="task.title" placeholder="Заголовок">
+				<textarea v-model="task.description" placeholder="Описание"></textarea>
+				<input type="date" v-model="task.deadline">
+				<div class="modal-buttons">
+					<button @click="$emit('save')">Сохранить</button>
+					<button @click="$emit('close')">Отмена</button>
+				</div>
+			</div>
+		</div>
+	`
+})
+
 new Vue({
 	el:'#app',
 	data:{
 		showModal:false,
 		editIndex:null,
-        editColumn: null,
+		editColumn:null,
 		tasks:{
 			planned:[],
 			progress:[],
@@ -15,7 +87,8 @@ new Vue({
 			description:'',
 			deadline:'',
 			createdAt:'',
-			updatedAt:''
+			updatedAt:'',
+			returnReason:''
 		}
 	},
 	methods:{
@@ -26,75 +99,54 @@ new Vue({
 			this.showModal=false
 			this.resetTask()
 		},
-		createTask(){
-			if(!this.newTask.title) return
-			const now=new Date().toLocaleString()
-			if(this.editIndex===null){
-				this.newTask.createdAt=now
-				this.tasks.planned.push({...this.newTask})
-			}else{
-				this.newTask.updatedAt=now
-				this.$set(this.tasks.planned,this.editIndex,{...this.newTask})
-			}
-			this.closeModal()
+		editTask(index){
+			let task=this.tasks.planned[index]
+			this.newTask={...task}
+			this.editIndex=index
+			this.editColumn='planned'
+			this.showModal=true
 		},
-		editTask(index) {
-			let task = this.tasks.planned[index]
-			this.newTask = { ...task }
-			this.editIndex = index
-			this.editColumn = 'planned'
-			this.showModal = true
+		editProgressTask(index){
+			let task=this.tasks.progress[index]
+			this.newTask={...task}
+			this.editIndex=index
+			this.editColumn='progress'
+			this.showModal=true
 		},
-        editProgressTask(index) {
-			let task = this.tasks.progress[index]
-			this.newTask = { ...task }
-			this.editIndex = index
-			this.editColumn = 'progress'
-			this.showModal = true
-		},
-		editTestingTask(index) {
-			let task = this.tasks.testing[index]
-			this.newTask = { ...task }
-			this.editIndex = index
-			this.editColumn = 'testing'
-			this.showModal = true
+		editTestingTask(index){
+			let task=this.tasks.testing[index]
+			this.newTask={...task}
+			this.editIndex=index
+			this.editColumn='testing'
+			this.showModal=true
 		},
 		deleteTask(index){
 			this.tasks.planned.splice(index,1)
 		},
 		resetTask(){
 			this.editIndex=null
+			this.editColumn=null
 			this.newTask={
 				title:'',
 				description:'',
 				deadline:'',
 				createdAt:'',
-				updatedAt:''
+				updatedAt:'',
+				returnReason:''
 			}
 		},
-        saveTask(){
+		saveTask(){
 			let now=new Date().toLocaleString()
 			if(this.editIndex!==null){
-				this.tasks.planned[this.editIndex].title=this.newTask.title
-				this.tasks.planned[this.editIndex].description=this.newTask.description
-				this.tasks.planned[this.editIndex].deadline=this.newTask.deadline
-				this.tasks.planned[this.editIndex].updatedAt=now
+				this.tasks[this.editColumn][this.editIndex]={...this.newTask, updatedAt:now}
 			}else{
-				this.tasks.planned.push({
-					title:this.newTask.title,
-					description:this.newTask.description,
-					deadline:this.newTask.deadline,
-					createdAt:now,
-					updatedAt:null
-				})
+				this.newTask.createdAt=now
+				this.tasks.planned.push({...this.newTask})
 			}
-			this.newTask.title=''
-			this.newTask.description=''
-			this.newTask.deadline=''
-			this.editIndex=null
+			this.resetTask()
 			this.showModal=false
 		},
-        moveToProgress(index){
+		moveToProgress(index){
 			let task=this.tasks.planned[index]
 			this.tasks.progress.push(task)
 			this.tasks.planned.splice(index,1)
@@ -106,21 +158,17 @@ new Vue({
 		},
 		moveToDone(index){
 			let task=this.tasks.testing[index]
+            task.returnReason = '' 
 			this.tasks.done.push(task)
 			this.tasks.testing.splice(index,1)
 		},
-        checkOverdue(task) {
-			if (!task.deadline) return false
-			return new Date(task.deadline) < new Date()
-		},
-        returnToProgress(index) {
-			let task = this.tasks.testing[index]
-			let reason = prompt('Укажите причину возврата задачи в работу:')
-			if (!reason) return
-			task.returnReason = reason
+		returnToProgress(index){
+			let task=this.tasks.testing[index]
+			let reason=prompt('Укажите причину возврата задачи в работу:')
+			if(!reason) return
+			task.returnReason=reason
 			this.tasks.progress.push(task)
-			this.tasks.testing.splice(index, 1) 
-		},
+			this.tasks.testing.splice(index,1)
+		}
 	}
-})
-
+});

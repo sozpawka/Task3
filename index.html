@@ -2,94 +2,43 @@
 <html lang="ru">
 <head>
 	<meta charset="UTF-8">
-	<title>Kanban Board</title>
+	<title>Канбан доска</title>
 	<link rel="stylesheet" href="css/style.css">
 	<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
 	<script defer src="js/main.js"></script>
 </head>
 <body>
 	<div id="app">
-		<h1 class="board-title">Kanban Board</h1>
-		<div v-if="showModal" class="modal">
-			<div class="modal-content">
-				<h3>{{ editIndex !== null ? 'Редактировать задачу' : 'Создать задачу' }}</h3>
-				<input
-					type="text"
-					v-model="newTask.title"
-					placeholder="Заголовок">
-				<textarea
-					v-model="newTask.description"
-					placeholder="Описание">
-				</textarea>
-				<input
-					type="date"
-					v-model="newTask.deadline">
-				<div class="modal-buttons">
-					<button @click="createTask">{{ editIndex !== null ? 'Сохранить' : 'Создать' }}</button>
-					<button @click="closeModal">Отмена</button>
-				</div>
-			</div>
-		</div>
+		<h1 class="board-title">Канбан доска</h1>
+		<task-modal v-if="showModal" :task="newTask" @close="closeModal" @save="saveTask"></task-modal>
 		<div class="board">
-			<div class="column">
-				<h2>Запланированные задачи</h2>
-				<button class="add-btn" @click="openModal">+ Создать задачу</button>
-				<div class="card" v-for="(task,index) in tasks.planned" :key="index">
-					<h3>{{task.title}}</h3>
-					<p>{{task.description}}</p>
-					<div class="meta">
-						<p>Создано: {{task.createdAt}}</p>
-						<p v-if="task.updatedAt">Редактировано: {{task.updatedAt}}</p>
-						<p>Deadline: {{task.deadline}}</p>
-					</div>
-					<button @click="editTask(index)">Редактировать</button>
-					<button @click="deleteTask(index)">Удалить</button>
-					<button @click="moveToProgress(index)">В работу →</button>
-				</div>
-			</div>
-			<div class="column">
-				<h2>Задачи в работе</h2>
-				<div class="card" v-for="(task,index) in tasks.progress" :key="index">
-					<h3>{{task.title}}</h3>
-					<p>{{task.description}}</p>
-					<div class="meta">
-						<p>Создано: {{task.createdAt}}</p>
-						<p v-if="task.updatedAt">Редактировано: {{task.updatedAt}}</p>
-						<p>Deadline: {{task.deadline}}</p>
-					</div>
-					<button @click="editProgressTask(index)">Редактировать</button>
-					<button @click="moveToTesting(index)">Тестирование →</button>
-				</div>
-			</div>
-			<div class="column">
-				<h2>Тестирование</h2>
-				<div class="card" v-for="(task,index) in tasks.testing" :key="index">
-					<h3>{{task.title}}</h3>
-					<p>{{task.description}}</p>
-					<div class="meta">
-						<p>Создано: {{task.createdAt}}</p>
-						<p v-if="task.updatedAt">Редактировано: {{task.updatedAt}}</p>
-						<p>Deadline: {{task.deadline}}</p>
-					</div>
-					<button @click="editTestingTask(index)">Редактировать</button>
-					<button @click="moveToDone(index)">Выполнено →</button>
-                    <button @click="returnToProgress(index)">← Вернуть в работу</button>
-				</div>
-			</div>
-			<div class="column">
-				<h2>Выполненные задачи</h2>
-				<div class="card" v-for="(task,index) in tasks.done" :key="index">
-					<h3>{{task.title}}</h3>
-					<p>{{task.description}}</p>
-					<div class="meta">
-						<p>Создано: {{task.createdAt}}</p>
-						<p v-if="task.updatedAt">Редактировано: {{task.updatedAt}}</p>
-						<p>Deadline: {{task.deadline}}</p>
-						<p v-if="checkOverdue(task)">Статус: Просрочено</p>
-						<p v-else>Статус: Выполнено вовремя</p>
-					</div>
-				</div>
-			</div>
+			<task-column 
+                title="Запланированные задачи" 
+                :tasks="tasks.planned" 
+                @edit="editTask" 
+                @delete="deleteTask" 
+                @move="moveToProgress" 
+                :show-add-btn="true"
+                @open-modal="openModal">
+            </task-column>
+			<task-column 
+				title="Задачи в работе" 
+				:tasks="tasks.progress" 
+				@edit="editProgressTask" 
+				@move="moveToTesting">
+			</task-column>
+			<task-column 
+				title="Тестирование" 
+				:tasks="tasks.testing" 
+				@edit="editTestingTask" 
+				@move-to-done="moveToDone" 
+				@return-to-progress="returnToProgress">
+			</task-column>
+            <task-column 
+                title="Выполненные задачи" 
+                :tasks="tasks.done" 
+                :is-done="true">
+            </task-column>
 		</div>
 	</div>
 </body>
