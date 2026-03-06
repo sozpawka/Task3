@@ -12,7 +12,7 @@
 		<h1 class="board-title">Kanban Board</h1>
 		<div v-if="showModal" class="modal">
 			<div class="modal-content">
-				<h3>Создать задачу</h3>
+				<h3>{{ editIndex !== null ? 'Редактировать задачу' : 'Создать задачу' }}</h3>
 				<input
 					type="text"
 					v-model="newTask.title"
@@ -25,8 +25,8 @@
 					type="date"
 					v-model="newTask.deadline">
 				<div class="modal-buttons">
-                    <button @click="createTask">Сохранить</button>
-                    <button @click="closeModal">Отмена</button>
+					<button @click="createTask">{{ editIndex !== null ? 'Сохранить' : 'Создать' }}</button>
+					<button @click="closeModal">Отмена</button>
 				</div>
 			</div>
 		</div>
@@ -35,54 +35,61 @@
 				<h2>Запланированные задачи</h2>
 				<button class="add-btn" @click="openModal">+ Создать задачу</button>
 				<div class="card" v-for="(task,index) in tasks.planned" :key="index">
-                    <h3>{{task.title}}</h3>
-		            <p>{{task.description}}</p>
-                    <div class="meta">
-                        <p>Создано: {{task.createdAt}}</p>
-                        <p v-if="task.updatedAt">Редактировано: {{task.updatedAt}}</p>
-                        <p>Deadline: {{task.deadline}}</p>
-                    </div>
-                    <button @click="editTask(index)">Редактировать</button>
-                    <button @click="deleteTask(index)">Удалить</button>
-                </div>
-		    </div>
-            <div class="column">
-                <h2>Задачи в работе</h2>
-                <div class="card" v-for="(task,index) in tasks.progress" :key="index">
-                    <h3>{{task.title}}</h3>
-                    <p>{{task.description}}</p>
-                    <div class="meta">
-                        <p>Создано: {{task.createdAt}}</p>
-                        <p v-if="task.updatedAt">Редактировано: {{task.updatedAt}}</p>
-                        <p>Deadline: {{task.deadline}}</p>
-                    </div>
-                </div>
-            </div>
-            <div class="column">
-                <h2>Тестирование</h2>
-                <div class="card" v-for="(task,index) in tasks.testing" :key="index">
-                    <h3>{{task.title}}</h3>
-                    <p>{{task.description}}</p>
-                    <div class="meta">
-                        <p>Создано: {{task.createdAt}}</p>
-                        <p v-if="task.updatedAt">Редактировано: {{task.updatedAt}}</p>
-                        <p>Deadline: {{task.deadline}}</p>
-                    </div>
-                </div>
-            </div>
-            <div class="column">
-                <h2>Выполненные задачи</h2>
-                <div class="card" v-for="(task,index) in tasks.done" :key="index">
-                    <h3>{{task.title}}</h3>
-                    <p>{{task.description}}</p>
-                    <div class="meta">
-                        <p>Создано: {{task.createdAt}}</p>
-                        <p v-if="task.updatedAt">Редактировано: {{task.updatedAt}}</p>
-                        <p>Deadline: {{task.deadline}}</p>
-                    </div>
-                </div>
-
-            </div>
-	    </div>
+					<h3>{{task.title}}</h3>
+					<p>{{task.description}}</p>
+					<div class="meta">
+						<p>Создано: {{task.createdAt}}</p>
+						<p v-if="task.updatedAt">Редактировано: {{task.updatedAt}}</p>
+						<p>Deadline: {{task.deadline}}</p>
+					</div>
+					<button @click="editTask(index)">Редактировать</button>
+					<button @click="deleteTask(index)">Удалить</button>
+					<button @click="moveToProgress(index)">В работу →</button>
+				</div>
+			</div>
+			<div class="column">
+				<h2>Задачи в работе</h2>
+				<div class="card" v-for="(task,index) in tasks.progress" :key="index">
+					<h3>{{task.title}}</h3>
+					<p>{{task.description}}</p>
+					<div class="meta">
+						<p>Создано: {{task.createdAt}}</p>
+						<p v-if="task.updatedAt">Редактировано: {{task.updatedAt}}</p>
+						<p>Deadline: {{task.deadline}}</p>
+					</div>
+					<button @click="editProgressTask(index)">Редактировать</button>
+					<button @click="moveToTesting(index)">Тестирование →</button>
+				</div>
+			</div>
+			<div class="column">
+				<h2>Тестирование</h2>
+				<div class="card" v-for="(task,index) in tasks.testing" :key="index">
+					<h3>{{task.title}}</h3>
+					<p>{{task.description}}</p>
+					<div class="meta">
+						<p>Создано: {{task.createdAt}}</p>
+						<p v-if="task.updatedAt">Редактировано: {{task.updatedAt}}</p>
+						<p>Deadline: {{task.deadline}}</p>
+					</div>
+					<button @click="editTestingTask(index)">Редактировать</button>
+					<button @click="moveToDone(index)">Выполнено →</button>
+				</div>
+			</div>
+			<div class="column">
+				<h2>Выполненные задачи</h2>
+				<div class="card" v-for="(task,index) in tasks.done" :key="index">
+					<h3>{{task.title}}</h3>
+					<p>{{task.description}}</p>
+					<div class="meta">
+						<p>Создано: {{task.createdAt}}</p>
+						<p v-if="task.updatedAt">Редактировано: {{task.updatedAt}}</p>
+						<p>Deadline: {{task.deadline}}</p>
+						<p v-if="checkOverdue(task)">Статус: Просрочено</p>
+						<p v-else>Статус: Выполнено вовремя</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </body>
 </html>
