@@ -9,6 +9,10 @@ Vue.component('task-card', {
 				<p v-if="task.updatedAt">Редактировано: {{task.updatedAt}}</p>
 				<p>Deadline: {{task.deadline}}</p>
 				<p v-if="task.returnReason">Причина возврата: {{task.returnReason}}</p>
+				<p v-if="column==='done'">
+					<b v-if="isLate">Просрочена</b>
+					<b v-else>Выполнено в срок</b>
+				</p>
 			</div>
 			<button v-if="!isDone" @click="$emit('edit', index)">Редактировать</button>
 			<button v-if="column==='planned'" @click="$emit('move', index)">→ В работу</button>
@@ -17,15 +21,21 @@ Vue.component('task-card', {
 			<button v-if="column==='testing'" @click="$emit('return-to-progress', index)">← Вернуть в работу</button>
 			<button v-if="column==='planned'" @click="$emit('delete', index)">Удалить</button>
 		</div>
-	`
+	`,
+	computed:{
+		isLate(){
+			let today=new Date()
+			let deadline=new Date(this.task.deadline)
+			return today>deadline
+		}
+	},
 })
 
 Vue.component('task-column',{
 	props:['title','tasks','showAddBtn','isDone'],
 	template:`
 		<div class="column">
-			<h2>{{title}}</h2>
-			<button v-if="showAddBtn" class="add-btn" @click="$emit('open-modal')">+ Создать задачу</button>
+		<h2>{{title}}</h2>
 			<task-card 
 				v-for="(task,index) in tasks" 
 				:key="index" 
@@ -39,6 +49,7 @@ Vue.component('task-column',{
 				@move-to-done="$emit('move-to-done', $event)"
 				@return-to-progress="$emit('return-to-progress', $event)">
 			</task-card>
+			<button v-if="showAddBtn" class="add-btn" @click="$emit('open-modal')">+ Создать задачу</button>
 		</div>
 	`,
 	computed:{
@@ -152,6 +163,10 @@ new Vue({
 			}
 		},
 		saveTask(){
+			if(!this.newTask.title || !this.newTask.description || !this.newTask.deadline){
+				alert('Заполните обязательные поля: заголовок, описание и дедлайн')
+				return
+			}
 			let now=new Date().toLocaleString()
 			if(this.editIndex!==null){
 				this.tasks[this.editColumn][this.editIndex]={...this.newTask, updatedAt:now}
